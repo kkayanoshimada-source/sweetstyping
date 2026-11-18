@@ -113,7 +113,8 @@ body {
   display: flex;
   justify-content: center;
   gap: 14px;
-  margin-bottom: 10px;
+  margin-top: 8px;     /* 上側マージン追加 */
+  margin-bottom: 18px;  /* 下側マージン追加（文字との重なり防止） */
 }
 
 .start-title {
@@ -298,7 +299,7 @@ body {
   color: #9c7a5b;
 }
 
-/* 入力フォーム（iOSズーム防止のためfont-sizeは16px以上に設定） */
+/* 入力フォーム */
 .input-area {
   width: 100%;
   margin-bottom: 14px;
@@ -348,7 +349,9 @@ body {
 /* リザルト画面 */
 .result-badge {
   font-size: 3.5rem;
-  margin-bottom: 6px;
+  line-height: 1.2;
+  margin-top: 6px;     /* 上側マージン追加 */
+  margin-bottom: 12px;  /* 下側マージン追加（文字との重なり防止） */
 }
 
 .result-subtitle {

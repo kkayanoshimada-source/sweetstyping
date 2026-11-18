@@ -113,7 +113,6 @@ const SWEETS_DATA: SweetItem[] = [
   { name: 'スイートポテト', kana: 'すいーとぽてと', category: '和菓子' },
 ];
 
-// カタカナ・大文字小文字などをひらがなに正規化
 const normalizeKana = (str: string): string => {
   return str
     .trim()
@@ -144,7 +143,11 @@ export default function App() {
 
   const currentSweet = deck[currentIndex] || SWEETS_DATA[0];
 
-  // 効果音の再生 (Web Audio API)
+  // HTMLの言語設定を強制的に日本語（lang="ja"）にする
+  useEffect(() => {
+    document.documentElement.lang = 'ja';
+  }, []);
+
   const playSuccessSound = () => {
     if (!soundEnabled) return;
     try {
@@ -163,8 +166,8 @@ export default function App() {
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, now); // D5
-      osc.frequency.setValueAtTime(880.0, now + 0.08); // A5
+      osc.frequency.setValueAtTime(587.33, now);
+      osc.frequency.setValueAtTime(880.0, now + 0.08);
 
       gain.gain.setValueAtTime(0.15, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
@@ -175,11 +178,10 @@ export default function App() {
       osc.start(now);
       osc.stop(now + 0.25);
     } catch {
-      // 音声再生非対応環境は無視
+      // ignore
     }
   };
 
-  // 山札をシャッフル
   const createShuffledDeck = () => {
     const copy = [...SWEETS_DATA];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -189,7 +191,6 @@ export default function App() {
     return copy;
   };
 
-  // ゲーム開始
   const startGame = () => {
     const newDeck = createShuffledDeck();
     setDeck(newDeck);
@@ -204,7 +205,6 @@ export default function App() {
     }, 50);
   };
 
-  // タイマー制御
   useEffect(() => {
     if (gameState !== 'playing') return;
 
@@ -222,12 +222,11 @@ export default function App() {
     return () => clearInterval(timer);
   }, [gameState]);
 
-  // 次の問題へ進む
   const advanceWord = () => {
     playSuccessSound();
     setScore((prev) => prev + POINTS_PER_WORD);
     setSolvedCount((prev) => prev + 1);
-    setInputValue('');
+    setInputValue(''); // 入力欄を即座にリセット
     setPopScore(true);
     setTimeout(() => setPopScore(false), 350);
 
@@ -240,7 +239,6 @@ export default function App() {
     });
   };
 
-  // 入力変化時のリアルタイム正誤判定（フリック入力の未確定状態でも即座に一致を検知）
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInputValue(val);
@@ -259,7 +257,24 @@ export default function App() {
     }
   };
 
-  // スキップ処理
+  // PCでのタイピング確定時（IME変換のEnter確定など）にバックスペース不要ですぐ次へ進めるための処理
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (gameState !== 'playing') return;
+    if (e.key === 'Enter') {
+      const normalizedInput = normalizeKana(inputValue);
+      const normalizedTargetKana = normalizeKana(currentSweet.kana);
+      const normalizedTargetName = normalizeKana(currentSweet.name);
+
+      if (
+        normalizedInput === normalizedTargetKana ||
+        normalizedInput === normalizedTargetName
+      ) {
+        e.preventDefault();
+        advanceWord();
+      }
+    }
+  };
+
   const handleSkip = () => {
     if (gameState !== 'playing') return;
     setShakeCard(true);
@@ -269,7 +284,6 @@ export default function App() {
     inputRef.current?.focus();
   };
 
-  // 一致文字数のハイライト計算
   const matchedLength = useMemo(() => {
     const normIn = normalizeKana(inputValue);
     const normTarget = normalizeKana(currentSweet.kana);
@@ -284,7 +298,6 @@ export default function App() {
     return count;
   }, [inputValue, currentSweet]);
 
-  // ランク判定
   const getRank = (finalScore: number) => {
     if (finalScore >= 250) return { title: '伝説のパティシエ', badge: '👑' };
     if (finalScore >= 180) return { title: '三ツ星スイーツ職人', badge: '🍰' };
@@ -295,11 +308,10 @@ export default function App() {
 
   return (
     <div className="app-container cream-stripe-bg">
-      {/* ヘッダー */}
       <header className="app-header">
         <div className="brand">
           <span className="brand-icon" aria-hidden="true">🍰</span>
-          <h1 className="brand-title">スイーツ・フリック！</h1>
+          <h1 className="brand-title">タイピング・フリック入力ゲーム！</h1>
         </div>
         <button
           type="button"
@@ -312,9 +324,7 @@ export default function App() {
         </button>
       </header>
 
-      {/* メインエリア */}
       <main className="main-content">
-        {/* スタート画面 */}
         {gameState === 'idle' && (
           <section className="card start-card">
             <div className="hero-badge">洋菓子・和菓子 全100種類収録</div>
@@ -324,14 +334,14 @@ export default function App() {
               <span>🍡</span>
               <span>🍵</span>
             </div>
-            <h2 className="start-title">60秒スイーツフリック</h2>
+            <h2 className="start-title">60秒タイピング・フリック入力</h2>
             <p className="start-desc">
-              次々と現れる美味しそうなスイーツの名前を、スマホのフリック入力やキーボードで素早く入力しよう！
+              次々と現れる美味しそうなスイーツの名前を、PCのキーボードやスマホのフリック入力で素早く入力しよう！
             </p>
             <ul className="rule-list">
               <li>⏱ 制限時間：<strong>60秒</strong></li>
               <li>✨ 1フレーズ完成：<strong>+10点</strong></li>
-              <li>📱 iPhone / Android / PC 対応（ひらがな・カタカナ・漢字OK）</li>
+              <li>💻 PC /📱 iPhone / Android対応 </li>
             </ul>
             <button type="button" className="primary-btn start-btn" onClick={startGame}>
               ゲームスタート！
@@ -339,10 +349,8 @@ export default function App() {
           </section>
         )}
 
-        {/* プレイ画面 */}
         {gameState === 'playing' && (
           <section className="play-wrapper">
-            {/* ステータスバー */}
             <div className="status-bar">
               <div className={`status-box ${timeLeft <= 10 ? 'timer-danger' : ''}`}>
                 <span className="status-label">のこり時間</span>
@@ -361,7 +369,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* タイムプログレスバー */}
             <div className="progress-track">
               <div
                 className={`progress-fill ${timeLeft <= 10 ? 'danger' : ''}`}
@@ -369,7 +376,6 @@ export default function App() {
               />
             </div>
 
-            {/* お題カード */}
             <div
               className={`card prompt-card ${shakeCard ? 'card-shake' : ''}`}
               onClick={() => inputRef.current?.focus()}
@@ -395,7 +401,6 @@ export default function App() {
                 ))}
               </div>
 
-              {/* 入力フィールド */}
               <div className="input-area">
                 <input
                   ref={inputRef}
@@ -403,6 +408,7 @@ export default function App() {
                   className="flick-input"
                   value={inputValue}
                   onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
                   placeholder="ここに入力（フリック）"
                   autoComplete="off"
                   autoCorrect="off"
@@ -421,7 +427,6 @@ export default function App() {
           </section>
         )}
 
-        {/* リザルト画面 */}
         {gameState === 'finished' && (
           <section className="card result-card">
             <div className="result-badge">{getRank(score).badge}</div>
