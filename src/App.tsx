@@ -37,7 +37,7 @@ const SWEETS_DATA: SweetItem[] = [
   { name: 'パリブレスト', kana: 'ぱりぶれすと', category: '洋菓子' },
   { name: 'カスタードプリン', kana: 'かすたーどぷりん', category: '洋菓子' },
   { name: 'フルーツタルト', kana: 'ふるーつたると', category: '洋菓子' },
-  { name: 'レモンパイ', kana: 'れもんぱい', category: '洋菓子' },
+  { name: 'レもんパイ', kana: 'れもんぱい', category: '洋菓子' },
   { name: 'ブラウニー', kana: 'ぶらうにー', category: '洋菓子' },
   { name: 'ワッフル', kana: 'わっふる', category: '洋菓子' },
   { name: 'パンケーキ', kana: 'ぱんけーき', category: '洋菓子' },
@@ -140,10 +140,10 @@ export default function App() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const isComposingRef = useRef<boolean>(false); // IME変換中かどうかを追跡
 
   const currentSweet = deck[currentIndex] || SWEETS_DATA[0];
 
-  // HTMLの言語設定を強制的に日本語（lang="ja"）にする
   useEffect(() => {
     document.documentElement.lang = 'ja';
   }, []);
@@ -199,6 +199,9 @@ export default function App() {
     setSolvedCount(0);
     setTimeLeft(GAME_DURATION);
     setInputValue('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
     setGameState('playing');
     setTimeout(() => {
       inputRef.current?.focus();
@@ -222,11 +225,18 @@ export default function App() {
     return () => clearInterval(timer);
   }, [gameState]);
 
+  // 入力クリアと次問への移行を確実に行う共通関数
   const advanceWord = () => {
     playSuccessSound();
     setScore((prev) => prev + POINTS_PER_WORD);
     setSolvedCount((prev) => prev + 1);
-    setInputValue(''); // 入力欄を即座にリセット
+    
+    // StateとDOM要素の値を強制的に完全リセット（IMEバッファの残骸を残さない）
+    setInputValue('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+
     setPopScore(true);
     setTimeout(() => setPopScore(false), 350);
 
@@ -237,13 +247,17 @@ export default function App() {
       }
       return prev + 1;
     });
+
+    // 入力欄へのフォーカスを維持
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 10);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setInputValue(val);
-
+  // 正誤チェックと自動進行の判定
+  const checkAndAdvance = (val: string) => {
     if (gameState !== 'playing') return;
+    if (isComposingRef.current) return; // IME変換確定前は何もしない
 
     const normalizedInput = normalizeKana(val);
     const normalizedTargetKana = normalizeKana(currentSweet.kana);
@@ -257,11 +271,29 @@ export default function App() {
     }
   };
 
-  // PCでのタイピング確定時（IME変換のEnter確定など）にバックスペース不要ですぐ次へ進めるための処理
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+    checkAndAdvance(val);
+  };
+
+  // IME変換の開始・終了イベントの監視
+  const handleCompositionStart = () => {
+    isComposingRef.current = true;
+  };
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    isComposingRef.current = false;
+    const val = (e.target as HTMLInputElement).value;
+    setInputValue(val);
+    checkAndAdvance(val);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (gameState !== 'playing') return;
-    if (e.key === 'Enter') {
-      const normalizedInput = normalizeKana(inputValue);
+    if (e.key === 'Enter' && !isComposingRef.current) {
+      const val = inputRef.current ? inputRef.current.value : inputValue;
+      const normalizedInput = normalizeKana(val);
       const normalizedTargetKana = normalizeKana(currentSweet.kana);
       const normalizedTargetName = normalizeKana(currentSweet.name);
 
@@ -280,6 +312,9 @@ export default function App() {
     setShakeCard(true);
     setTimeout(() => setShakeCard(false), 300);
     setInputValue('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
     setCurrentIndex((prev) => (prev + 1) % deck.length);
     inputRef.current?.focus();
   };
@@ -406,8 +441,10 @@ export default function App() {
                   ref={inputRef}
                   type="text"
                   className="flick-input"
-                  value={inputValue}
+                  defaultValue={inputValue}
                   onChange={handleInputChange}
+                  onCompositionStart={handleCompositionStart}
+                  onCompositionEnd={handleCompositionEnd}
                   onKeyDown={handleKeyDown}
                   placeholder="ここに入力（フリック）"
                   autoComplete="off"
