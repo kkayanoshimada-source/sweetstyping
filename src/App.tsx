@@ -345,8 +345,7 @@ export default function App() {
     <div className="app-container cream-stripe-bg">
       <header className="app-header">
         <div className="brand">
-          <span className="brand-icon" aria-hidden="true">🍰</span>
-          <h1 className="brand-title">60秒タイピング・フリック入力ゲーム！</h1>
+          <h1 className="brand-title">60秒タイピング・<br />フリック入力ゲーム！</h1>
         </div>
         <button
           type="button"
@@ -371,7 +370,7 @@ export default function App() {
             </div>
             <h2 className="start-title">60秒タイピング・<br />フリック入力</h2>
             <p className="start-desc">
-              次々と現れるスイーツの名前を、<br />PCのキーボードやスマホのフリック入力で素早く入力しよう！
+              次々と現れるスイーツの名前を、<br />PCのキーボードやスマホの<br />フリック入力で素早く入力しよう！
             </p>
             <ul className="rule-list">
               <li>⏱ 制限時間：<strong>60秒</strong></li>
