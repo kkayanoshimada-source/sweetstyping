@@ -346,7 +346,7 @@ export default function App() {
       <header className="app-header">
         <div className="brand">
           <span className="brand-icon" aria-hidden="true">🍰</span>
-          <h1 className="brand-title">60秒タイピング・<br />フリック入力ゲーム！</h1>
+          <h1 className="brand-title">60秒タイピング・フリック入力ゲーム！</h1>
         </div>
         <button
           type="button"
