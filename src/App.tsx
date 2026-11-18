@@ -368,7 +368,7 @@ export default function App() {
               <span>🍡</span>
               <span>🍵</span>
             </div>
-            <h2 className="start-title">60秒タイピング・<br />フリック入力ゲーム！</h2>
+            <h2 className="start-title">60秒タイピング・<br />フリック入力</h2>
             <p className="start-desc">
               次々と現れるスイーツの名前を<br />PCのキーボードやスマホの<br />フリック入力で素早く入力しよう！
             </p>
