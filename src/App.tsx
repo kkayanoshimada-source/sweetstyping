@@ -37,7 +37,7 @@ const SWEETS_DATA: SweetItem[] = [
   { name: 'パリブレスト', kana: 'ぱりぶれすと', category: '洋菓子' },
   { name: 'カスタードプリン', kana: 'かすたーどぷりん', category: '洋菓子' },
   { name: 'フルーツタルト', kana: 'ふるーつたると', category: '洋菓子' },
-  { name: 'レもんパイ', kana: 'れもんぱい', category: '洋菓子' },
+  { name: 'レモンパイ', kana: 'れもんぱい', category: '洋菓子' },
   { name: 'ブラウニー', kana: 'ぶらうにー', category: '洋菓子' },
   { name: 'ワッフル', kana: 'わっふる', category: '洋菓子' },
   { name: 'パンケーキ', kana: 'ぱんけーき', category: '洋菓子' },
@@ -371,7 +371,7 @@ export default function App() {
             </div>
             <h2 className="start-title">60秒タイピング・フリック入力</h2>
             <p className="start-desc">
-              次々と現れる美味しそうなスイーツの名前を、PCのキーボードやスマホのフリック入力で素早く入力しよう！
+              次々と現れるスイーツの名前を、PCのキーボードやスマホのフリック入力で素早く入力しよう！
             </p>
             <ul className="rule-list">
               <li>⏱ 制限時間：<strong>60秒</strong></li>
@@ -489,7 +489,7 @@ export default function App() {
             </div>
 
             <button type="button" className="primary-btn retry-btn" onClick={startGame}>
-              もういちど遊ぶ ↻
+              もう一度遊ぶ ↻
             </button>
           </section>
         )}
