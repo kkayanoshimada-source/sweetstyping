@@ -46,10 +46,6 @@ body {
   gap: 8px;
 }
 
-.brand-icon {
-  font-size: 1.6rem;
-}
-
 .brand-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -120,13 +116,6 @@ body {
   gap: 14px;
   margin-top: 8px;     /* 上側マージン追加 */
   margin-bottom: 18px;  /* 下側マージン追加（文字との重なり防止） */
-}
-
-.start-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #5c3a21;
-  margin-bottom: 10px;
 }
 
 .start-desc {
@@ -440,9 +429,5 @@ body {
   .card {
     padding: 22px 16px;
     border-radius: 20px;
-  }
-
-  .start-title {
-    font-size: 1.5rem;
   }
 }
